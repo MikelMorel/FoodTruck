@@ -1,0 +1,39 @@
+version: "3.0"
+
+services:
+  nginx:
+    image: nginx:1.21-alpine 
+    volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf
+    - ./flask-app/templates/:/usr/share/nginx/html
+    - ./flask-app/static/:/usr/share/nginx/static
+    ports:
+    - '80:80'
+    networks:
+    - frontend
+
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2 
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data 
+    networks:
+      - backend
+    
+
+
+  app:
+    build: ./
+    networks:
+      - backend
+      - frontend
+
+networks:
+  frontend:
+  backend:
+volumes:
+  esdata:
+    driver: local
